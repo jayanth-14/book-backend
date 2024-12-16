@@ -1,0 +1,22 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jayanth-14/book-backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jayanth-14/book-backend/issues"
+  },
+  "homepage": "https://github.com/jayanth-14/book-backend#readme",
+  "description": "",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
