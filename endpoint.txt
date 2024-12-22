@@ -1,0 +1,4 @@
+## endpoints used in project
+
+sign up function = '/signup'
+sign in function = '/signin'
