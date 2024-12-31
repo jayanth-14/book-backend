@@ -20,11 +20,16 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.47.10",
     "body-parser": "^1.20.3",
+    "cookie-session": "^2.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "mongoose": "^8.9.3",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.9",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
   }
 }

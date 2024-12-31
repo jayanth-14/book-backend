@@ -1,53 +1,38 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cookieSession = require('cookie-session');
 const { createClient } = require('@supabase/supabase-js');
+const cors = require('cors');
+const connectDb = require('./config/connectdb');
 require('dotenv').config();
 
-// Supabase configuration
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_KEY;
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+// Routes
+const loginRoute = require('./routes/login_routes');
+const userRouter = require('./routes/user_route');
+const bookRouter = require('./routes/books_routes');
+const { swaggerDocs, swaggerUi } = require('./swagger/swagger');
 
 const app = express();
+app.use(cors());
 app.use(bodyParser.json());
 
-app.post('/signup', async (req, res) => {
-    const { email, password } = req.body;
+app.use(cookieSession({
+  name: 'session',
+  secret: 'rebooked',
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+}));
 
-    if (!email || !password) {
-        return res.status(400).json({ error: 'Email and password are required.' });
-    }
+app.use(loginRoute);
+app.use(userRouter);
+// app.use(bookRouter);
 
-    try {
-        const { data, error } = await supabase.auth.signUp({ email, password });
-        if (error) {
-            return res.status(400).json({ error: error.message });
-        }
-        res.status(200).json({ message: 'Sign up successful!', data });
-    } catch (err) {
-        res.status(500).json({ error: 'Internal server error.', details: err.message });
-    }
-});
+// Serve Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-app.post('/signin', async (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        return res.status(400).json({ error: 'Email and password are required.' });
-    }
-
-    try {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-            return res.status(400).json({ error: error.message });
-        }
-        res.status(200).json({ message: 'Sign in successful!', data });
-    } catch (err) {
-        res.status(500).json({ error: 'Internal server error.', details: err.message });
-    }
-});
-
-const PORT = 3000;
-app.listen(PORT, () => {
+const PORT = 5000;
+connectDb().then(() => {
+  console.log('Mongo db connected');
+  app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
+  });
 });

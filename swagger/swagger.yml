@@ -1,0 +1,149 @@
+openapi: 3.0.0
+info:
+  title: Book API Documentation
+  version: 1.0.0
+  description: Book API Information
+servers:
+  - url: http://localhost:5000
+    description: Development server
+
+paths:
+  /signup:
+    post:
+      tags:
+        - Authentication
+      summary: Create a new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - name
+                - password
+                - phone
+              properties:
+                email:
+                  type: string
+                  format: email
+                name:
+                  type: string
+                password:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        '200':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: User created successfully
+        '400':
+          description: Bad request
+          
+  /signin:
+    post:
+      tags:
+        - Authentication
+      summary: Sign in to user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: User signed in successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      fullName:
+                        type: string
+                      email:
+                        type: string
+                      userId:
+                        type: string
+        '401':
+          description: Invalid credentials
+
+  /user/{email}:
+    get:
+      tags:
+        - Users
+      summary: Get user details by email
+      parameters:
+        - in: path
+          name: email
+          required: true
+          schema:
+            type: string
+          description: Email of the user
+      responses:
+        '200':
+          description: User details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      fullName:
+                        type: string
+                      email:
+                        type: string
+                      phone:
+                        type: string
+                      address:
+                        type: string
+                      location:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                          coordinates:
+                            type: array
+                            items:
+                              type: number
+                      isEmailVerified:
+                        type: boolean
+                      isPhoneVerified:
+                        type: boolean
+                      wishlist:
+                        type: array
+                        items:
+                          type: string
+        '404':
+          description: User not found
