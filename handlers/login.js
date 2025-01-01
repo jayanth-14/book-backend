@@ -14,16 +14,18 @@ const loginHandler = async (req, res) => {
     }
     const validPassword = password === user.password;
     
-    if (validPassword) {
+    if (!validPassword) {
       return res.status(400).json({
         success: false,
         message: 'Invalid email or password'
       });
     }
+    delete user.password;
+    req.session.userId = await user._id;
     res.status(200).json({ status: "success", data: {
       fullName : user.fullName,
       email: user.email,
-      userId: _id
+      userId: user._id
     } });
   } catch (err) {
     internalErrorHandler(res, err);

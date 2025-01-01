@@ -7,10 +7,33 @@ const userDetailsHandler = async (req, res) => {
   const email = req.params['email'];
   try {
     const data = await userModel.findOne({email: email});
+    delete data.password;
     res.status(200).json({ status: "success", data });
   } catch (error) {
     return internalErrorHandler(res, error);
   }
 };
 
-module.exports = {userDetailsHandler};
+const profileDetailsHandler = async (req, res) => {
+  const userId = req.session.userId;
+  try {
+    const data = await userModel.findOne({_id: userId});
+    delete data.password;
+    res.status(200).json({ status: "success", data });
+  } catch (error) {
+    return internalErrorHandler(res, error);
+  }
+};
+
+const getUserLocation = async (req, res) => {
+  const userId = req.session.userId;
+  try {
+    const user = await userModel.findOne({_id: userId});
+    return await user.location;
+  }
+  catch (error) {
+    return internalErrorHandler(res, error);
+  }
+};
+
+module.exports = {userDetailsHandler, profileDetailsHandler, getUserLocation};

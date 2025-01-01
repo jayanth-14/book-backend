@@ -22,12 +22,14 @@ app.use(cookieSession({
   maxAge: 7 * 24 * 60 * 60 * 1000,
 }));
 
-app.use(loginRoute);
-app.use(userRouter);
-// app.use(bookRouter);
-
 // Serve Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+
+app.use(loginRoute);
+app.use(userRouter);
+app.use(bookRouter);
+
 
 const PORT = 5000;
 connectDb().then(() => {

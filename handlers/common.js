@@ -18,7 +18,7 @@ const hasFields = fields => {
 };
 
 const allowAuthorized = (req, res, next) => {
-  if (req.session.id) {
+  if (req.session.userId) {
     next();
   } else {
     res.status(401).json({ error: 'unauthorized' });

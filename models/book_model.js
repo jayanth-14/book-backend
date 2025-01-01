@@ -1,3 +1,6 @@
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
 // Book Schema
 const bookSchema = new Schema({
   title: {
@@ -79,6 +82,6 @@ const bookSchema = new Schema({
 bookSchema.index({ location: '2dsphere' });
 bookSchema.index({ title: 'text', author: 'text', description: 'text' });
 
-const bookModal = mongoose.model('books', bookSchema);
+const bookModel = mongoose.model('books', bookSchema);
 
-module.exports = bookModal;
+module.exports = bookModel;
