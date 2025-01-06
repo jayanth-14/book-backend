@@ -21,7 +21,7 @@ const loginHandler = async (req, res) => {
       });
     }
     delete user.password;
-    req.session.userId = await user._id;
+    req.session.userId = user._id;
     res.status(200).json({ status: "success", data: {
       fullName : user.fullName,
       email: user.email,

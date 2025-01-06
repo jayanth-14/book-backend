@@ -2,6 +2,7 @@ const userModel = require("../models/user_model");
 const bookModel = require("../models/book_model");
 const { inputsErrorHandler, internalErrorHandler } = require("./common");
 const { getUserLocation } = require("./user");
+const { getBooksNear, searchBooks } = require("../database/userQueries");
 
 
 
@@ -23,22 +24,27 @@ const addBookHandler = async (req, res) => {
 
 const getBooksHandler = async (req, res) => {
   try {
-    const {coordinates} = await getUserLocation(req, res);
-    const books = await bookModel.find({
-      location: {
-       $near: {
-        $maxDistance: 50000, // distance in meters
-        $geometry: {
-         type: "Point",
-         coordinates: coordinates
-        }
-       }
-      }
-     });
+    const id = req.session.userId;
+    const books = await getBooksNear(id);
     res.status(200).json({ status: "success", books });
   } catch (error) {
     internalErrorHandler(res, error);
   }
 };
 
-module.exports = { addBookHandler, getBooksHandler };
+const searchBooksHandler = async (req, res) => {
+  try {
+    const { title,author,category } = req.body;
+    const books = await bookModel.find({title: title,author: author,category: category});
+  
+    if (books.length === 0) {
+      return res.status(404).json({ status: "error", message: "No books found matching the given criteria." });
+    }       
+    res.status(200).json( { status: "success", books });
+    
+    } catch (error) {
+    internalErrorHandler(res, error);
+  }
+};
+
+module.exports = { addBookHandler, getBooksHandler, searchBooksHandler };
