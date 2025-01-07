@@ -13,7 +13,13 @@ const bookRouter = require('./routes/books_routes');
 const { swaggerDocs, swaggerUi } = require('./swagger/swagger');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173",
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+  credentials: true,
+}));
 app.use(bodyParser.json());
 
 app.use(cookieSession({
