@@ -44,7 +44,7 @@ const signUpHandler = async (req, res) => {
         "address": address,
         "location": {
           "type": "Point",
-          "coordinates": [coordinates[0], coordinates[1]]
+          "coordinates": coordinates
         }
       };
     userModel.create(userData)
@@ -52,9 +52,12 @@ const signUpHandler = async (req, res) => {
         res.status(200).json({ status: "success", message });
       })
       .catch((error) => {
+        console.log(error);
         return res.status(400).json({ "error": error });
       })
   } catch (err) {
+    console.log(err);
+    
     internalErrorHandler(res, err);
   }
 }

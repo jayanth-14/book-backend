@@ -34,15 +34,64 @@ const getBooksHandler = async (req, res) => {
 
 const searchBooksHandler = async (req, res) => {
   try {
-    const { title,author,category } = req.body;
-    const books = await bookModel.find({title: title,author: author,category: category});
-  
+    const { q } = req.query;
+    const books = await bookModel.aggregate([
+      {
+        $match: {
+          $text: { $search: q }
+        }
+      },
+      {
+        $addFields: {
+          score: { $meta: "textScore" }
+        }
+      },
+      {
+        $unionWith: {
+          coll: "books",
+          pipeline: [
+            {
+              $match: {
+                $or: [
+                  { title: { $regex: q, $options: 'i' } },
+                  { description: { $regex: q, $options: 'i' } },
+                  { author: { $regex: q, $options: 'i' } }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      {
+        $group: {
+          _id: "$_id",
+          title :{ $first: "$title" },
+          author : { $first : "$author" },
+          publishedYear : { $first : "$publishedYear" },
+          description : { $first : "$description" },
+          category : { $first : "$category" },
+          condition : { $first : "$condition" },
+          price : { $first : "$price" },
+          quantity : { $first : "$quantity" },
+          }
+      },
+      {
+        $sort: {
+          score: -1,
+          title: 1
+        }
+      },
+      {
+        $limit: 20
+      }
+    ]);
+
     if (books.length === 0) {
       return res.status(404).json({ status: "error", message: "No books found matching the given criteria." });
-    }       
-    res.status(200).json( { status: "success", books });
-    
-    } catch (error) {
+    }
+    res.status(200).json({ status: "success", books });
+
+  } catch (error) {
     internalErrorHandler(res, error);
   }
 };

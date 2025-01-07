@@ -8,6 +8,6 @@ bookRouter.use(allowAuthorized);
 
 bookRouter.post("/books", hasFields(['title', 'author', 'publishedYear', 'description', 'category', 'condition', 'price', 'quantity', 'imageUrl']) ,books.addBookHandler);
 bookRouter.get("/books", books.getBooksHandler);
-bookRouter.post("/search", books.searchBooksHandler);
+bookRouter.get("/search", books.searchBooksHandler);
 
 module.exports = bookRouter;
