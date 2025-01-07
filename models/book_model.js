@@ -13,6 +13,9 @@ const bookSchema = new Schema({
     required: true,
     trim: true
   },
+
+  // ISBN: International Standard Book Number
+
   publishedYear: {
     type: Number,
     required: true,
