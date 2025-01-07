@@ -67,6 +67,7 @@ const searchBooksHandler = async (req, res) => {
           _id: "$_id",
           title :{ $first: "$title" },
           author : { $first : "$author" },
+          publisher:{ $first: "$publisher" },
           publishedYear : { $first : "$publishedYear" },
           description : { $first : "$description" },
           category : { $first : "$category" },
