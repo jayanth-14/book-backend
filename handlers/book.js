@@ -54,7 +54,7 @@ const searchBooksHandler = async (req, res) => {
               $match: {
                 $or: [
                   { title: { $regex: q, $options: 'i' } },
-                  { description: { $regex: q, $options: 'i' } },
+                  { publisher: { $regex: q, $options: 'i' } },
                   { author: { $regex: q, $options: 'i' } }
                 ]
               }
