@@ -15,7 +15,11 @@ const bookSchema = new Schema({
   },
 
   // ISBN: International Standard Book Number
-
+publisher: {
+    type: String,
+    required: true,
+    trim: true
+  },
   publishedYear: {
     type: Number,
     required: true,
