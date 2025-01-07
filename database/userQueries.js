@@ -33,6 +33,7 @@ const searchBooksWithLocation = async (userId, searchQuery) => {
     _id: "$_id",
     title: { $first: "$title" },
     author: { $first: "$author" },
+    publisher: { $first: "$publisher" },
     publishedYear: { $first: "$publishedYear" },
     description: { $first: "$description" },
     category: { $first: "$category" },
@@ -59,7 +60,7 @@ const searchBooksWithLocation = async (userId, searchQuery) => {
         $or: [
           { $text: { $search: searchQuery } },
           { title: { $regex: searchQuery, $options: 'i' } },
-          { description: { $regex: searchQuery, $options: 'i' } },
+          { publisher: { $regex: searchQuery, $options: 'i' } },
           { author: { $regex: searchQuery, $options: 'i' } }
         ]
       }
