@@ -16,6 +16,8 @@ const userDetailsHandler = async (req, res) => {
 
 const profileDetailsHandler = async (req, res) => {
   const userId = req.session.userId;
+  console.log(userId);
+  
   try {
     const data = await userModel.findOne({_id: userId});
     delete data.password;

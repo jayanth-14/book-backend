@@ -6,7 +6,7 @@ userRouter.use(allowAuthorized);
 
 userRouter.get("/user/:email",userDetailsHandler)
 
-userRouter.get("/user/profile",profileDetailsHandler)
+userRouter.post("/profile",profileDetailsHandler)
 
 
 module.exports = userRouter;
