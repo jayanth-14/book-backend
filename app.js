@@ -39,13 +39,6 @@ app.use(cookieSession({
 // Serve Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-app.use((req, res, next) => {
-  console.log('Request URL:', req.url);
-  console.log('Request headers:', req.headers);
-  console.log('Session:', req.session);
-  next();
-});
-
 app.use(loginRoute);
 app.use(userRouter);
 app.use(bookRouter);
