@@ -4,9 +4,9 @@ const {userDetailsHandler, profileDetailsHandler} = require("../handlers/user")
 
 userRouter.use(allowAuthorized);
 
-userRouter.get("/user/:email",userDetailsHandler)
+userRouter.get("/user/:id",userDetailsHandler)
 
-userRouter.get("/user/profile",profileDetailsHandler)
+userRouter.get("/profile",profileDetailsHandler)
 
 
 module.exports = userRouter;

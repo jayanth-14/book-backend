@@ -1,9 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const cookieSession = require('cookie-session');
+const cookieSession = require('express-session');
 const { createClient } = require('@supabase/supabase-js');
 const cors = require('cors');
 const connectDb = require('./config/connectdb');
+const requestLogger = require('morgan')
 require('dotenv').config();
 
 // Routes
@@ -13,24 +14,37 @@ const bookRouter = require('./routes/books_routes');
 const { swaggerDocs, swaggerUi } = require('./swagger/swagger');
 
 const app = express();
+app.use(requestLogger('dev'));
 app.use(cors({
   origin: "http://localhost:5173",
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   preflightContinue: false,
   optionsSuccessStatus: 204,
   credentials: true,
+  allowedHeaders: ['Content-Type', 'Accept', 'Authorization'], // Add this
+  exposedHeaders: ['set-cookie'], // Add this
 }));
 app.use(bodyParser.json());
 
 app.use(cookieSession({
   name: 'session',
   secret: 'rebooked',
-  maxAge: 7 * 24 * 60 * 60 * 1000,
+  maxAge: 24 * 60 * 60 * 1000,
+  sameSite: 'lax',  // Try this for development
+  secure: false,
+  httpOnly: true,
+  domain: 'localhost'  // Add this
 }));
 
 // Serve Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
+app.use((req, res, next) => {
+  console.log('Request URL:', req.url);
+  console.log('Request headers:', req.headers);
+  console.log('Session:', req.session);
+  next();
+});
 
 app.use(loginRoute);
 app.use(userRouter);

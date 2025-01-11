@@ -4,9 +4,9 @@ const userModel = require("../models/user_model");
 
 
 const userDetailsHandler = async (req, res) => {
-  const email = req.params['email'];
+  const id = req.params['id'];
   try {
-    const data = await userModel.findOne({email: email});
+    const data = await userModel.findOne({_id: id});
     delete data.password;
     res.status(200).json({ status: "success", data });
   } catch (error) {

@@ -1,20 +1,24 @@
 const bookModel = require("../models/book_model");
 const userModel = require("../models/user_model");
 
-const getLocationNearQuery = async (userId) => {
+const getCoordinates = async (userId) => {
   const user = await userModel.findOne({ _id: userId });
-  const coordinates = user.location.coordinates;
+  return user.location.coordinates;
+}
+
+const getLocationNearQuery = async (userId) => {
+  const coordinates = await getCoordinates(userId);
   return {
-    location: {
-      $near: {
-        $maxDistance: 50000, // distance in meters
-        $geometry: {
-          type: "Point",
-          coordinates: coordinates
-        }
-      }
+    $geoNear: {
+      near: {
+        type: "Point",
+        coordinates: coordinates,
+        maxDistance: 50000,
+      },
+      distanceField: "distance",
+        spherical: true
     }
-  };
+  }
 }
 
 const getBooksNear = async (userId) => {
@@ -22,63 +26,63 @@ const getBooksNear = async (userId) => {
   return await bookModel.find(locationQuery);
 }
 
-const getLocationQuery = async (userId) => {
-  const user = await userModel.findOne({ _id: userId });
-  return user.location.coordinates;
+const getScoreAggregateObject = () => {
+  return {
+    $addFields: {
+      score: {
+        $cond: {
+          if: { $meta: "textScore" },
+          then: { $meta: "textScore" },
+          else: 0
+        }
+      }
+    }
+  }
+}
+const getGroupAggregateObject = () => {
+  return {
+    $group: {
+      _id: "$_id",
+      title: { $first: "$title" },
+      author: { $first: "$author" },
+      publisher: { $first: "$publisher" },
+      publishedYear: { $first: "$publishedYear" },
+      description: { $first: "$description" },
+      category: { $first: "$category" },
+      condition: { $first: "$condition" },
+      price: { $first: "$price" },
+      quantity: { $first: "$quantity" },
+      distance: { $first: "$distance" },
+      score: { $first: "$score" }
+    }
+  }
+}
+
+const getRegxAggregateObject = (SearchQuery) => {
+  return {
+    $match: {
+      $or: [
+        { $text: { $search: searchQuery } },
+        { title: { $regex: searchQuery, $options: 'i' } },
+        { publisher: { $regex: searchQuery, $options: 'i' } },
+        { author: { $regex: searchQuery, $options: 'i' } }
+      ]
+    }
+  }
 }
 
 const searchBooksWithLocation = async (userId, searchQuery) => {
   const coordinates = await getLocationQuery(userId);
-  const groupObject = {
-    _id: "$_id",
-    title: { $first: "$title" },
-    author: { $first: "$author" },
-    publisher: { $first: "$publisher" },
-    publishedYear: { $first: "$publishedYear" },
-    description: { $first: "$description" },
-    category: { $first: "$category" },
-    condition: { $first: "$condition" },
-    price: { $first: "$price" },
-    quantity: { $first: "$quantity" },
-    distance: { $first: "$distance" },
-    score: { $first: "$score" }
-  };
+  const groupObject = getGroupAggregateObject();
+  const scoreObject = getScoreAggregateObject();
+  const locationQuery = getLocationNearQuery(userId);
+  const regxQueryObject = getRegxAggregateObject(searchQuery);
 
   return await bookModel.aggregate([
-    {
-      $geoNear: {
-        near: {
-          type: "Point",
-          coordinates: coordinates
-        },
-        distanceField: "distance",
-        spherical: true
-      }
-    },
-    {
-      $match: {
-        $or: [
-          { $text: { $search: searchQuery } },
-          { title: { $regex: searchQuery, $options: 'i' } },
-          { publisher: { $regex: searchQuery, $options: 'i' } },
-          { author: { $regex: searchQuery, $options: 'i' } }
-        ]
-      }
-    },
-    {
-      $addFields: {
-        score: {
-          $cond: {
-            if: { $meta: "textScore" },
-            then: { $meta: "textScore" },
-            else: 0
-          }
-        }
-      }
-    },
-    {
-      $group: groupObject
-    },
+    locationQuery,
+    regxQueryObject,
+    groupObject,
+    scoreObject,
     {
       $sort: {
         score: -1,

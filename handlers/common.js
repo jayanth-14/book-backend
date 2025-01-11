@@ -17,7 +17,7 @@ const hasFields = fields => {
   };
 };
 
-const allowAuthorized = (req, res, next) => {
+const allowAuthorized = (req, res, next) => {  
   if (req.session.userId) {
     next();
   } else {
