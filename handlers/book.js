@@ -36,7 +36,7 @@ const searchBooksHandler = async (req, res) => {
   try {
     const { query, searchBy, condition, category, year } = req.query;
     const userId = req.session.userId;
-    const books = await searchBooksWithLocation(userId,query, searchBy, condition, category, year);
+    const books = await searchBooksWithLocation(userId, query, searchBy, condition, category, year);
 
     if (books.length === 0) {
       return res.status(204).json({ status: "error", message: "No books found matching the given criteria." });
@@ -48,4 +48,18 @@ const searchBooksHandler = async (req, res) => {
   }
 };
 
-module.exports = { addBookHandler, getBooksHandler, searchBooksHandler };
+const getBookDetails = async (req, res) => {
+  try {
+    const bookId = req.params.id;
+    const book = await bookModel.findById({ _id: bookId });
+    if (!book) {
+      inputsErrorHandler(res, "Book not found");
+    }
+    res.status(200).json({ status: "success", book });
+  }
+  catch (error) {
+    internalErrorHandler(res, error);
+  }
+};
+
+module.exports = { addBookHandler, getBooksHandler, searchBooksHandler, getBookDetails };
