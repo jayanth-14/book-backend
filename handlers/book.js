@@ -39,7 +39,7 @@ const searchBooksHandler = async (req, res) => {
     const books = await searchBooksWithLocation(userId,query, searchBy, condition, category, year);
 
     if (books.length === 0) {
-      return res.status(404).json({ status: "error", message: "No books found matching the given criteria." });
+      return res.status(204).json({ status: "error", message: "No books found matching the given criteria." });
     }
     res.status(200).json({ status: "success", books });
 

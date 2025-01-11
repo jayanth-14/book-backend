@@ -22,11 +22,11 @@ const searchBooksWithLocation = async (userId, searchQuery, searchBy, category, 
         { publisher: { $regex: searchQuery, $options: 'i' } },
         { description: { $regex: searchQuery, $options: 'i' } }
       ];
-    }else if (searchBy === 'title') {
+    }else if (searchBy.toLowerCase() === 'title') {
       matchConditions.title = { $regex: searchQuery, $options: 'i' };
-    } else if (searchBy === 'author') {
+    } else if (searchBy.toLowerCase() === 'author') {
       matchConditions.author = { $regex: searchQuery, $options: 'i' };
-    } else if (searchBy === 'publisher') {
+    } else if (searchBy.toLowerCase() === 'publisher') {
       matchConditions.publisher = { $regex: searchQuery, $options: 'i' };
     }
   }
