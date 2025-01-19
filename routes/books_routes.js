@@ -9,5 +9,7 @@ bookRouter.post("/books", hasFields(['title', 'author', 'publishedYear', 'descri
 bookRouter.get("/books", books.getBooksHandler);
 bookRouter.get("/search", books.searchBooksHandler);
 bookRouter.get("/book/:id", books.getBookDetails );
+bookRouter.get("/wishlist", books.getWishList)
+bookRouter.post("/wishlist", hasFields(['bookId']), books.addToWishList)
 
 module.exports = bookRouter;

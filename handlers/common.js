@@ -25,4 +25,12 @@ const allowAuthorized = (req, res, next) => {
   }
 };
 
-module.exports = {internalErrorHandler, inputsErrorHandler, hasFields, allowAuthorized}
+const isLogined = (req, res) => {
+  if (req.session.userId) {
+    res.status(200).json({ status: 'success', isLogined: true, userId: req.session.userId });
+  } else {
+    res.status(200).json({ status: 'success', isLogined: false });
+  }
+};
+
+module.exports = {internalErrorHandler, inputsErrorHandler, hasFields, allowAuthorized, isLogined}

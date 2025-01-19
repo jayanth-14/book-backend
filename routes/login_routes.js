@@ -1,6 +1,8 @@
 const loginRouter = require('express').Router();
-const { hasFields } = require('../handlers/common');
+const { hasFields, isLogined } = require('../handlers/common');
 const login = require('../handlers/login');
+
+loginRouter.get('/islogined', isLogined)
 
 loginRouter.post('/signup', hasFields(["email", "fullName", "password", "phone"]), login.signUpHandler);
 

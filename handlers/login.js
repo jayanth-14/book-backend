@@ -4,7 +4,6 @@ const userModel = require('../models/user_model')
 
 
 // login hanlers
-
 const loginHandler = async (req, res) => {
   const { email, password } = req.body;
   try {

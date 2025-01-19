@@ -114,4 +114,30 @@ const getBooksNear = async (userId) => {
   ]);
 };
 
-module.exports = { getBooksNear, searchBooksWithLocation };
+// code / logic for wishlist adding
+
+const fetchWishList = async (userId) => {
+  const data =  await userModel.findOne({_id: userId}).select('wishlist');
+  return data.wishlist;
+}
+
+const getWishListDetails = async (list) => {
+  const wishlist = [];
+  const bookPromises = list.map(bookId => bookModel.findOne({ _id: bookId }).select(['_id', "title", "author", "price", "imageUrl"]));
+  
+  const books = await Promise.all(bookPromises);
+  
+  books.forEach(book => {
+    if (book) { 
+      wishlist.push(book);
+    }
+  });
+
+  return wishlist;
+};
+
+const updateWishList = async (userId, bookId) => {
+  return await userModel.updateOne({_id: userId}, {$addToSet: {wishlist:bookId}})
+}
+
+module.exports = { getBooksNear, searchBooksWithLocation, fetchWishList, updateWishList, getWishListDetails };

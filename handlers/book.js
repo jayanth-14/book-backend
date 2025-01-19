@@ -2,17 +2,17 @@ const userModel = require("../models/user_model");
 const bookModel = require("../models/book_model");
 const { inputsErrorHandler, internalErrorHandler } = require("./common");
 const { getUserLocation } = require("./user");
-const { getBooksNear, searchBooks, searchBooksWithLocation } = require("../database/userQueries");
+const { getBooksNear, searchBooks, searchBooksWithLocation, updateWishList, fetchWishList, getWishListDetails } = require("../database/userQueries");
 
 
 
 const addBookHandler = async (req, res) => {
   try {
-    const { title, author, publishedYear, description, category, condition, price, quantity, imageUrl } = req.body;
+    const { title, author,publisher, publishedYear, description, category, condition, price, quantity, imageUrl } = req.body;
     const sellerId = req.session.userId;
     const user = await userModel.findOne({ _id: sellerId });
     const newBook = {
-      title, author, publishedYear, description, category, condition, price, quantity,
+      title, author, publisher, publishedYear, description, category, condition, price, quantity,
       sellerId, location: user.location, imageUrl
     }
     const book = await bookModel.create(newBook);
@@ -62,4 +62,26 @@ const getBookDetails = async (req, res) => {
   }
 };
 
-module.exports = { addBookHandler, getBooksHandler, searchBooksHandler, getBookDetails };
+const getWishList = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const wishList = await fetchWishList(userId);
+    const wishListDetails = await getWishListDetails(wishList);
+    res.status(200).json({ status: "success", wishList : wishListDetails });
+  } catch (error) {
+    internalErrorHandler(res, error)
+  }
+}
+
+const addToWishList = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const bookId = req.body.bookId;
+    const status = await updateWishList(userId, bookId);
+    res.status(200).json({ status: "success", details : status });
+  } catch (error) {
+    internalErrorHandler(res, error)
+  }
+}
+
+module.exports = { addBookHandler, getBooksHandler, searchBooksHandler, getBookDetails, getWishList, addToWishList }; 
