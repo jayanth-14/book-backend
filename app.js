@@ -11,6 +11,7 @@ require('dotenv').config();
 const loginRoute = require('./routes/login_routes');
 const userRouter = require('./routes/user_route');
 const bookRouter = require('./routes/books_routes');
+const transactionRouter = require('./routes/transaction_routes')
 const { swaggerDocs, swaggerUi } = require('./swagger/swagger');
 
 const app = express();
@@ -45,7 +46,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use(loginRoute);
 app.use(userRouter);
 app.use(bookRouter);
-
+app.use(transactionRouter);
 
 const PORT = 5000;
 connectDb().then(() => {

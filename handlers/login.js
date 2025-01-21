@@ -32,8 +32,8 @@ const loginHandler = async (req, res) => {
 }
 
 const signUpHandler = async (req, res) => {
-  const { email, password, fullName, phone, address, coordinates } = req.body;
-
+  const { email, password, fullName, phone, address, coordinates, credits } = req.body;
+  const newCredits = credits || 0;
   try {
     const userData = {
         "fullName": fullName,
@@ -44,7 +44,8 @@ const signUpHandler = async (req, res) => {
         "location": {
           "type": "Point",
           "coordinates": coordinates
-        }
+        },
+        "credits" : newCredits
       };
     userModel.create(userData)
       .then((message) => {

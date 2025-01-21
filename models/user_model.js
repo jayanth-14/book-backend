@@ -20,6 +20,10 @@ const userSchema = new Schema({
     required: true,
     Selection: false,
   },
+  credits : {
+    type: Number,
+    default: 0
+  },
   phone: {
     type: String,
     required: true,
