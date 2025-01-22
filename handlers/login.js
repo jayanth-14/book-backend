@@ -33,7 +33,7 @@ const loginHandler = async (req, res) => {
 
 const signUpHandler = async (req, res) => {
   const { email, password, fullName, phone, address, coordinates, credits } = req.body;
-  const newCredits = credits || 0;
+  const newCredits = credits || 1000;
   try {
     const userData = {
         "fullName": fullName,

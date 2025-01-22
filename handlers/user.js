@@ -1,6 +1,7 @@
 // importing nessesary handlers
 const { inputsErrorHandler, internalErrorHandler } = require("./common");
 const userModel = require("../models/user_model");
+const bookModel = require("../models/book_model");
 
 
 const userDetailsHandler = async (req, res) => {
@@ -47,4 +48,16 @@ const getAddress = async (req, res) => {
   }
 }
 
-module.exports = { userDetailsHandler, profileDetailsHandler, getUserLocation, getAddress };
+const getMyBooks =  async (req, res) => {
+  const userId = req.session.userId;
+  try {
+    const books = await bookModel.find({ sellerId: userId });
+    res.status(200).send({status: "success", books: books});
+  }
+  catch (error) {
+    return internalErrorHandler(res, error);
+  }
+}
+
+
+module.exports = { userDetailsHandler, profileDetailsHandler, getUserLocation, getAddress, getMyBooks };

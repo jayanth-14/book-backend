@@ -50,7 +50,7 @@ const searchBooksWithLocation = async (userId, searchQuery, searchBy, category, 
           coordinates: coordinates
         },
         distanceField: "distance",
-        maxDistance: 50000,
+        maxDistance: 5000000,
         spherical: true,
         query: matchConditions // Here we are applying the match conditions to only get books which match our search query
       }
@@ -96,7 +96,7 @@ const getBooksNear = async (userId) => {
           coordinates: coordinates
         },
         distanceField: "distance",
-        maxDistance: 50000,
+        maxDistance: 5000000,
         spherical: true
       }
     },
@@ -105,7 +105,8 @@ const getBooksNear = async (userId) => {
         title: 1,
         author: 1,
         publisher: 1,
-        distance: 1
+        distance: 1,
+        price:1
       }
     },
     {
