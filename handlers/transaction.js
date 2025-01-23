@@ -8,6 +8,7 @@ const initializeTransaction = async (req, res) => {
   try {
     const transaction = req.body;
     const userId = req.session.userId;
+    const user = await userModel.findById(userId);
     const newTransaction = {
       userId: userId,
       transactionDate: new Date(),
@@ -15,7 +16,8 @@ const initializeTransaction = async (req, res) => {
       bookId: transaction.bookId,
       quantity: transaction.quantity,
       sellerId : transaction.sellerId,
-      title: transaction.title
+      title: transaction.title,
+      userName : user.fullName
     }
     const result = await transactionModel.create(newTransaction);
     return result;
@@ -115,4 +117,15 @@ const getOrders = async (req, res) => {
   }
 }
 
-module.exports = { checkout, delivered, getOrders }
+const getTransactions = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const limit = req.query.limit;
+    const orders = await transactionModel.find({sellerId:userId});
+    res.status(200).send({status: 'success', trasactions: orders});
+  } catch (error) {
+    internalErrorHandler(res, error);
+  }
+}
+
+module.exports = { checkout, delivered, getOrders, getTransactions }

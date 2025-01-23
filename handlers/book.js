@@ -8,12 +8,13 @@ const { getBooksNear, searchBooks, searchBooksWithLocation, updateWishList, fetc
 
 const addBookHandler = async (req, res) => {
   try {
-    const { title, author,publisher, publishedYear, description, category, condition, price, quantity, imageUrl } = req.body;
+    const { title, author,publisher, publishedYear, description, category, condition, price, quantity } = req.body;
+    const image = req.file.buffer;
     const sellerId = req.session.userId;
     const user = await userModel.findOne({ _id: sellerId });
     const newBook = {
       title, author, publisher, publishedYear, description, category, condition, price, quantity,
-      sellerId, location: user.location, imageUrl
+      sellerId, location: user.location, image: {data : image}
     }
     const book = await bookModel.create(newBook);
     res.status(201).json({ status: "success", book });
