@@ -48,7 +48,7 @@ app.use(userRouter);
 app.use(bookRouter);
 app.use(transactionRouter);
 
-const PORT = 5000;
+const PORT = 3000;
 connectDb().then(() => {
   console.log('Mongo db connected');
   app.listen(PORT, () => {
