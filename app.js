@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieSession = require('express-session');
-const { createClient } = require('@supabase/supabase-js');
 const cors = require('cors');
 const connectDb = require('./config/connectdb');
 const requestLogger = require('morgan')
@@ -13,6 +12,7 @@ const userRouter = require('./routes/user_route');
 const bookRouter = require('./routes/books_routes');
 const transactionRouter = require('./routes/transaction_routes')
 const { swaggerDocs, swaggerUi } = require('./swagger/swagger');
+const {getSellerDashboardStats} = require('./database/seller');
 
 const app = express();
 app.use(requestLogger('dev'));
@@ -51,7 +51,7 @@ app.use(transactionRouter);
 const PORT = 3000;
 connectDb().then(() => {
   console.log('Mongo db connected');
-  app.listen(PORT, () => {
+  app.listen(PORT, async() => {
     console.log(`Server is running on http://localhost:${PORT}`);
   });
 });
