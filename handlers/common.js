@@ -1,3 +1,5 @@
+const userModel = require("../models/user_model");
+
 const internalErrorHandler = (res, err) => {
   return res.status(500).json({ error: 'Internal server error.', details: err.message });
 }
@@ -25,9 +27,10 @@ const allowAuthorized = (req, res, next) => {
   }
 };
 
-const isLogined = (req, res) => {
+const isLogined = async (req, res) => {
   if (req.session.userId) {
-    res.status(200).json({ status: 'success', isLogined: true, userId: req.session.userId });
+    const user = await userModel.findById(req.session.userId);
+    res.status(200).json({ status: 'success', isLogined: true, user  });
   } else {
     res.status(200).json({ status: 'success', isLogined: false });
   }
