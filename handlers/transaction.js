@@ -126,9 +126,9 @@ const delivered = async (req, res) => {
   try {
     const { transactionId } = req.body;
     const transaction = await transactionModel.findById(transactionId);
+    console.log(transaction);
     transaction.transactionStatus = "delivered";
     await transaction.save();
-    await paySeller(transactionId);
     return res.status(200).send({
       status: "success",
       transactionStatus: "delivered",
@@ -136,6 +136,25 @@ const delivered = async (req, res) => {
     });
   } catch (error) {
     console.log("error at delivered", error);
+    
+    internalErrorHandler(res, error);
+  }
+};
+
+const updateCancelled = async (req, res) => {
+  try {
+    const { transactionId } = req.body;
+    const transaction = await transactionModel.findById(transactionId);
+    console.log(transaction);
+    transaction.transactionStatus = "cancelled";
+    await transaction.save();
+    return res.status(200).send({
+      status: "success",
+      transactionStatus: "cancelled",
+      message: "Transaction Calcelled successfully",
+    });
+  } catch (error) {
+    console.log("error at cancelling transaction : ", error);
     
     internalErrorHandler(res, error);
   }
@@ -180,4 +199,4 @@ const updateTransaction = async (req, res) => {
   }
 };
 
-module.exports = { checkout, delivered, getOrders, getTransactions, updateTransaction };
+module.exports = { checkout, delivered, getOrders, getTransactions, updateTransaction, updateCancelled };

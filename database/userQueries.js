@@ -6,39 +6,46 @@ const getCoordinates = async (userId) => {
   return user.location.coordinates;
 };
 
-const searchBooksWithLocation = async (userId, searchQuery, searchBy, category, condition, year) => {
+const searchBooksWithLocation = async (
+  userId,
+  searchQuery,
+  searchBy,
+  category,
+  condition,
+  year
+) => {
   const coordinates = await getCoordinates(userId);
-  
+
   // Build match conditions
   const matchConditions = {};
-  
-  // Add search condition 
+
+  // Add search condition
   if (searchQuery) {
-    if (searchBy.toLowerCase() === 'all') {
+    if (searchBy.toLowerCase() === "all") {
       // When searchBy is "All", we search across multiple fields
       matchConditions.$or = [
-        { title: { $regex: searchQuery, $options: 'i' } },
-        { author: { $regex: searchQuery, $options: 'i' } },
-        { publisher: { $regex: searchQuery, $options: 'i' } },
-        { description: { $regex: searchQuery, $options: 'i' } }
+        { title: { $regex: searchQuery, $options: "i" } },
+        { author: { $regex: searchQuery, $options: "i" } },
+        { publisher: { $regex: searchQuery, $options: "i" } },
+        { description: { $regex: searchQuery, $options: "i" } },
       ];
-    }else if (searchBy.toLowerCase() === 'title') {
-      matchConditions.title = { $regex: searchQuery, $options: 'i' };
-    } else if (searchBy.toLowerCase() === 'author') {
-      matchConditions.author = { $regex: searchQuery, $options: 'i' };
-    } else if (searchBy.toLowerCase() === 'publisher') {
-      matchConditions.publisher = { $regex: searchQuery, $options: 'i' };
+    } else if (searchBy.toLowerCase() === "title") {
+      matchConditions.title = { $regex: searchQuery, $options: "i" };
+    } else if (searchBy.toLowerCase() === "author") {
+      matchConditions.author = { $regex: searchQuery, $options: "i" };
+    } else if (searchBy.toLowerCase() === "publisher") {
+      matchConditions.publisher = { $regex: searchQuery, $options: "i" };
     }
   }
 
   // Add other filters
-  if (category && category.toLowerCase() !== 'all') {
+  if (category && category.toLowerCase() !== "all") {
     matchConditions.category = category;
   }
-  if (condition && condition.toLowerCase() !== 'all') {
+  if (condition && condition.toLowerCase() !== "all") {
     matchConditions.condition = condition;
   }
-  if (year && year.toLowerCase() !== 'all') {
+  if (year && year.toLowerCase() !== "all") {
     matchConditions.publishedYear = year;
   }
 
@@ -47,13 +54,13 @@ const searchBooksWithLocation = async (userId, searchQuery, searchBy, category, 
       $geoNear: {
         near: {
           type: "Point",
-          coordinates: coordinates
+          coordinates: coordinates,
         },
         distanceField: "distance",
         maxDistance: 5000000,
         spherical: true,
-        query: matchConditions // Here we are applying the match conditions to only get books which match our search query
-      }
+        query: matchConditions, // Here we are applying the match conditions to only get books which match our search query
+      },
     },
     // here we are specifing what fields we want
     {
@@ -67,38 +74,50 @@ const searchBooksWithLocation = async (userId, searchQuery, searchBy, category, 
         condition: 1,
         price: 1,
         quantity: 1,
-        distance: 1
-      }
+        distance: 1,
+      },
     },
     // We are sorting the books / collection based on the distance. i.e. we get books near us first
     {
       $sort: {
-        distance: 1
-      }
+        distance: 1,
+      },
     },
     // we are temperyly limiting the response to 20 books / collection, and In future we implement paging we work on this
     {
-      $limit: 20
-    }
+      $limit: 20,
+    },
   ];
 
   return await bookModel.aggregate(pipeline);
 };
 
-const getBooksNear = async (userId) => {
+const getBooksNear = async (userId, offsetValue, limitValue) => {
   const coordinates = await getCoordinates(userId);
-  
+  const offset = parseInt(offsetValue) || 0;
+  const limit = parseInt(limitValue) || 20;
   return await bookModel.aggregate([
     {
       $geoNear: {
         near: {
           type: "Point",
-          coordinates: coordinates
+          coordinates: coordinates,
         },
         distanceField: "distance",
         maxDistance: 5000000,
-        spherical: true
-      }
+        spherical: true,
+      },
+    },
+    {
+      $match: {
+        sellerId: { $ne: userId },
+      },
+    },
+    {
+      $skip: offset,
+    },
+    {
+      $limit: limit,
     },
     {
       $project: {
@@ -106,30 +125,31 @@ const getBooksNear = async (userId) => {
         author: 1,
         publisher: 1,
         distance: 1,
-        price:1
-      }
+        price: 1,
+      },
     },
-    {
-      $limit: 20
-    }
   ]);
 };
 
 // code / logic for wishlist adding
 
 const fetchWishList = async (userId) => {
-  const data =  await userModel.findOne({_id: userId}).select('wishlist');
+  const data = await userModel.findOne({ _id: userId }).select("wishlist");
   return data.wishlist;
-}
+};
 
 const getWishListDetails = async (list) => {
   const wishlist = [];
-  const bookPromises = list.map(bookId => bookModel.findOne({ _id: bookId }).select(['_id', "title", "author", "price", "imageUrl"]));
-  
+  const bookPromises = list.map((bookId) =>
+    bookModel
+      .findOne({ _id: bookId })
+      .select(["_id", "title", "author", "price", "imageUrl"])
+  );
+
   const books = await Promise.all(bookPromises);
-  
-  books.forEach(book => {
-    if (book) { 
+
+  books.forEach((book) => {
+    if (book) {
       wishlist.push(book);
     }
   });
@@ -138,7 +158,16 @@ const getWishListDetails = async (list) => {
 };
 
 const updateWishList = async (userId, bookId) => {
-  return await userModel.updateOne({_id: userId}, {$addToSet: {wishlist:bookId}})
-}
+  return await userModel.updateOne(
+    { _id: userId },
+    { $addToSet: { wishlist: bookId } }
+  );
+};
 
-module.exports = { getBooksNear, searchBooksWithLocation, fetchWishList, updateWishList, getWishListDetails };
+module.exports = {
+  getBooksNear,
+  searchBooksWithLocation,
+  fetchWishList,
+  updateWishList,
+  getWishListDetails,
+};
