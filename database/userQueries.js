@@ -75,6 +75,7 @@ const searchBooksWithLocation = async (
         price: 1,
         quantity: 1,
         distance: 1,
+        image: 1,
       },
     },
     // We are sorting the books / collection based on the distance. i.e. we get books near us first
@@ -84,18 +85,16 @@ const searchBooksWithLocation = async (
       },
     },
     // we are temperyly limiting the response to 20 books / collection, and In future we implement paging we work on this
-    {
-      $limit: 20,
-    },
+    // {
+    //   $limit: 20,
+    // },
   ];
 
   return await bookModel.aggregate(pipeline);
 };
 
-const getBooksNear = async (userId, offsetValue, limitValue) => {
+const getBooksNear = async (userId) => {
   const coordinates = await getCoordinates(userId);
-  const offset = parseInt(offsetValue) || 0;
-  const limit = parseInt(limitValue) || 20;
   return await bookModel.aggregate([
     {
       $geoNear: {
@@ -113,12 +112,12 @@ const getBooksNear = async (userId, offsetValue, limitValue) => {
         sellerId: { $ne: userId },
       },
     },
-    {
-      $skip: offset,
-    },
-    {
-      $limit: limit,
-    },
+    // {
+    //   $skip: offset,
+    // },
+    // {
+    //   $limit: limit,
+    // },
     {
       $project: {
         title: 1,
@@ -126,6 +125,7 @@ const getBooksNear = async (userId, offsetValue, limitValue) => {
         publisher: 1,
         distance: 1,
         price: 1,
+        image: '$image'
       },
     },
   ]);
@@ -143,7 +143,7 @@ const getWishListDetails = async (list) => {
   const bookPromises = list.map((bookId) =>
     bookModel
       .findOne({ _id: bookId })
-      .select(["_id", "title", "author", "price", "imageUrl"])
+      .select(["_id", "title", "author", "price", "image"])
   );
 
   const books = await Promise.all(bookPromises);

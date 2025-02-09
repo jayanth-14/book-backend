@@ -28,7 +28,7 @@ const getBooksHandler = async (req, res) => {
     const id = req.session.userId;
     const offset = req.query.offset;
     const limit = req.query.limit;
-    const books = await getBooksNear(id, offset, limit);
+    const books = await getBooksNear(id);
     res.status(200).json({ status: "success", books });
   } catch (error) {
     internalErrorHandler(res, error);

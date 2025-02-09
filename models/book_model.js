@@ -20,11 +20,10 @@ publisher: {
     required: true,
     trim: true
   },
-  publishedYear: {
+  edition: {
     type: Number,
+    default: 1,
     required: true,
-    min: 1800,
-    max: new Date().getFullYear()
   },
   description: {
     type: String,
