@@ -15,7 +15,7 @@ const initializeTransaction = async (req, res) => {
   try {
     const transaction = req.body;
     const userId = req.session.userId;
-    console.log("transaction body : ", transaction);
+    // console.log("transaction body : ", transaction);
     const user = await userModel.findById(userId);
     const book = await bookModel.findById(transaction.bookId);
     const newTransaction = {
@@ -29,6 +29,8 @@ const initializeTransaction = async (req, res) => {
       userName: user.fullName,
     };
     const result = await transactionModel.create(newTransaction);
+    console.log(result);
+    
     return result;
   } catch (error) {
     console.log("error at transaction intitializing", error);
@@ -36,40 +38,23 @@ const initializeTransaction = async (req, res) => {
   }
 };
 
-const validateUserCredits = async (req, res, userId, transactionId) => {
-  try {
-    const { amount } = req.body;
-    const user = await userModel.findById(userId);
-    if (user.credits >= amount) {
-      return;
-    }
-    updateFailedMessage(transactionId, "user credits are in-sufficient");
-    res.status(400).send({
-      status: "failed",
-      message: "user credits are in-sufficient",
-      credits: user.credits,
-    });
-  } catch (error) {
-    internalErrorHandler(res, error);
-  }
-};
 
 const validateQuantity = async (req, res, transactionId, bookId) => {
   const availableQuantity = await getAvailableQuantity(bookId);
   const neededQuantiy = await getNeededQuantity(transactionId);
   if (availableQuantity >= neededQuantiy) {
-    return;
+    return undefined;
   }
   await updateFailedMessage(transactionId, "Needed Quantity not available");
-  res.status(400).send({
+  return {
     status: "failed",
     message: "Needed Quantity not available",
-  });
+  };
 };
 
 const initializePayment = async (amount, seller) => {
   try {
-    const gatewayUrl ="http://localhost:3000/" + "init";
+    const gatewayUrl =  process.env.PAYEMENT + "init";
     console.log({seller, amount});
     
     const paymentTransaction = await fetch(gatewayUrl, {
@@ -94,22 +79,20 @@ const initializePayment = async (amount, seller) => {
 
 const checkout = async (req, res) => {
   try {
-    const transaction = await initializeTransaction(req, res);
-    console.log("transaction : ", transaction);
-    console.log("seller id : ", transaction.sellerId);
-    
-    console.log("request body : ", req.body);
-    
+    const transaction = await initializeTransaction(req, res);    
     const seller = await userModel.findById(req.body.sellerId)
-    console.log(seller);
     
-    await validateQuantity(req, res, transaction._id, transaction.bookId);
+    const quantityValidation = await validateQuantity(req, res, transaction._id, transaction.bookId);
+    if (quantityValidation !== undefined) {
+      return res.status(201).send(quantityValidation);
+    }
     const payment = await initializePayment(
       transaction.transactionAmount,
       seller.email
     );
     console.log("Payment : ", payment);
-    
+    transaction.paymentId = payment.transaction._id;
+    await transaction.save();
     return res.status(200).send({
       status: "success",
       message: "Transaction completed successfully",
@@ -126,6 +109,21 @@ const delivered = async (req, res) => {
   try {
     const { transactionId } = req.body;
     const transaction = await transactionModel.findById(transactionId);
+    console.log("Crediting in process");
+    
+    const response = await fetch(process.env.PAYEMENT+'credit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        transaction_id: transaction.paymentId
+      })
+    })
+    const data = await response.json();
+    console.log("Credit transfer : ", data);
+    
     console.log(transaction);
     transaction.transactionStatus = "delivered";
     await transaction.save();
