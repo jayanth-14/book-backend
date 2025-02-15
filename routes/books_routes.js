@@ -15,5 +15,6 @@ bookRouter.get("/search", books.searchBooksHandler);
 bookRouter.get("/book/:id", books.getBookDetails );
 bookRouter.get("/wishlist", books.getWishList)
 bookRouter.post("/wishlist", hasFields(['bookId']), books.addToWishList)
+bookRouter.delete("/wishlist", hasFields(['bookId']), books.removeFromWishlist)
 
 module.exports = bookRouter;

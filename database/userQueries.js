@@ -157,17 +157,25 @@ const getWishListDetails = async (list) => {
   return wishlist;
 };
 
-const updateWishList = async (userId, bookId) => {
+const addBookToWishList = async (userId, bookId) => {
   return await userModel.updateOne(
     { _id: userId },
     { $addToSet: { wishlist: bookId } }
   );
 };
 
+const removeBookFromWishlist = async (userId, bookId) => {
+  return await userModel.updateOne(
+    { _id: userId },
+    { $pull: { wishlist: bookId } }
+  );
+}
+
 module.exports = {
   getBooksNear,
   searchBooksWithLocation,
   fetchWishList,
-  updateWishList,
+  addBookToWishList,
   getWishListDetails,
+  removeBookFromWishlist,
 };
