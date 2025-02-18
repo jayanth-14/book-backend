@@ -88,10 +88,11 @@ const checkout = async (req, res) => {
     }
     const payment = await initializePayment(
       transaction.transactionAmount,
-      seller.email
+      seller.email,
     );
     console.log("Payment : ", payment);
     transaction.paymentId = payment.transaction._id;
+    transaction.userName = seller.fullName;
     await transaction.save();
     return res.status(200).send({
       status: "success",
@@ -141,10 +142,11 @@ const delivered = async (req, res) => {
 
 const updateCancelled = async (req, res) => {
   try {
-    const { transactionId } = req.body;
+    const { transactionId, message } = req.body;
     const transaction = await transactionModel.findById(transactionId);
     console.log(transaction);
     transaction.transactionStatus = "cancelled";
+    transaction.message = message;
     await transaction.save();
     return res.status(200).send({
       status: "success",
@@ -197,4 +199,27 @@ const updateTransaction = async (req, res) => {
   }
 };
 
-module.exports = { checkout, delivered, getOrders, getTransactions, updateTransaction, updateCancelled };
+const getDeliveries = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const deliveries = await transactionModel.find({ sellerId: userId });
+    res.status(200).send({ status: "success", deliveries });
+  } catch (error) {
+    internalErrorHandler(res, error);
+  }
+}
+
+const getTransactionDetails = async (req, res) => {
+  try {
+    const transactionId = req.params.id;
+    const transaction = await transactionModel.findById(transactionId);
+    const seller = await userModel.findById(transaction.sellerId);
+    const book = await bookModel.findById(transaction.bookId);
+    const buyer = await userModel.findById(transaction.userId);
+    res.status(200).send({ status: "success", transaction, seller, buyer, book });
+  } catch (error) {
+    internalErrorHandler(res, error);
+  }
+}
+
+module.exports = { checkout, delivered, getOrders, getTransactionDetails, getTransactions, updateTransaction, updateCancelled, getDeliveries };
