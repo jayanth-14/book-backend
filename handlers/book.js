@@ -111,6 +111,7 @@ const getBookDetails = async (req, res) => {
       edition : book.edition,
       publisher: book.publisher,
       quantity : book.quantity,
+      sellerId : book.sellerId,
       image : book.image,
       isWishlist: isWishlist,
       isOwnedBook: isOwnedBook,

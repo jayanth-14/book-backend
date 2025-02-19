@@ -25,7 +25,8 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Accept', 'Authorization'], // Add this
   exposedHeaders: ['set-cookie'], // Add this
 }));
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
+app.use(express.json())
 
 app.use(cookieSession({
   name: 'session',

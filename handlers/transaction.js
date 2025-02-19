@@ -56,6 +56,7 @@ const initializePayment = async (amount, seller) => {
   try {
     const gatewayUrl =  process.env.PAYEMENT + "init";
     console.log({seller, amount});
+    console.log(seller);
     
     const paymentTransaction = await fetch(gatewayUrl, {
       method: "POST",
@@ -86,6 +87,8 @@ const checkout = async (req, res) => {
     if (quantityValidation !== undefined) {
       return res.status(201).send(quantityValidation);
     }
+    console.log("seller : ", transaction.sellerId);
+    
     const payment = await initializePayment(
       transaction.transactionAmount,
       seller.email,
@@ -123,9 +126,10 @@ const delivered = async (req, res) => {
       })
     })
     const data = await response.json();
-    console.log("Credit transfer : ", data);
-    
-    console.log(transaction);
+    const bookId = transaction.bookId;
+    const book = await bookModel.findById(bookId);
+    book.quantity -= transaction.quantity;
+    await book.save();
     transaction.transactionStatus = "delivered";
     await transaction.save();
     return res.status(200).send({
