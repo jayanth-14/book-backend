@@ -66,11 +66,33 @@ const getSellerStats = async (req, res) => {
   }
 };
 
+const updateProfile = async (req, res) => {
+  const userId = req.session.userId;
+  const { fullName,password,  phone, address, coordinates } = req.body;
+  try {
+    const user = await userModel.findOne({ _id: userId });
+    user.fullName = fullName || user.fullName;
+    user.password = password || user.password;
+    user.phone = phone || user.phone;
+    user.address = address || user.address;
+    user.coordinates = coordinates;
+    await user.save();
+    res.status(200).send({ status: "success" });
+  }
+  catch (error) {
+    console.log("error at updating profile : ", error);
+    
+    return internalErrorHandler(res, error);
+  }
+}
+
+
 module.exports = {
   userDetailsHandler,
   profileDetailsHandler,
   getUserLocation,
   getAddress,
   getMyBooks,
-  getSellerStats
+  getSellerStats,
+  updateProfile
 };

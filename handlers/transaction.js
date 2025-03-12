@@ -143,26 +143,54 @@ const delivered = async (req, res) => {
     internalErrorHandler(res, error);
   }
 };
-
 const updateCancelled = async (req, res) => {
   try {
     const { transactionId, message } = req.body;
+    
     const transaction = await transactionModel.findById(transactionId);
-    console.log(transaction);
+    
+    if (!transaction) {
+      return res.status(404).json({ message: "Transaction not found" });
+    }
+
+    console.log("Transaction found:", transaction);
+
     transaction.transactionStatus = "cancelled";
     transaction.message = message;
     await transaction.save();
-    return res.status(200).send({
+
+    console.log("Transaction updated locally, calling payment gateway...");
+
+    const response = await fetch(`${process.env.PAYEMENT}cancel`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ transaction_id: transaction.paymentId })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error("Payment service error:", result);
+      return res.status(500).json({ message: "Payment cancellation failed", error: result });
+    }
+
+    console.log("Payment cancellation success:", result);
+
+    return res.status(200).json({
       status: "success",
       transactionStatus: "cancelled",
-      message: "Transaction Calcelled successfully",
+      message: "Transaction cancelled successfully",
     });
+
   } catch (error) {
-    console.log("error at cancelling transaction : ", error);
-    
-    internalErrorHandler(res, error);
+    console.error("Error at cancelling transaction:", error);
+    return res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };
+
 
 const getOrders = async (req, res) => {
   try {
